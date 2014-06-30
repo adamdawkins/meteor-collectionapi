@@ -90,17 +90,27 @@ CollectionAPI._requestListener = function (server, request, response) {
   // Check for the X-Auth-Token header or auth-token in the query string
   self._requestAuthToken = self._request.headers['x-auth-token'] ? self._request.headers['x-auth-token'] : self._server._querystring.parse(self._requestUrl.query)['auth-token'];
 
-  var requestPath;
+  var requestPath, collectionQuery = {};
   if (self._server.options.standAlone === true && ! self._server.options.apiPath) {
     requestPath = self._requestUrl.pathname.split('/').slice(1,3);
   } else {
     requestPath = self._requestUrl.pathname.split('/').slice(2,4);
   }
 
-  self._requestPath = {
-    collectionPath: requestPath[0],
-    collectionId: requestPath[1]
-  };
+  self._requestPath = {};
+  self._requestPath.collectionPath = requestPath[0];
+  
+  if(requestPath[1].indexOf(':') > -1) {
+    var field, query;
+    field = requestPath[1].split(':')[0];
+    query = requestPath[1].split(':')[1] 
+    collectionQuery[field] = query
+  } else {
+    collectionQuery = requestPath[1];
+  }
+
+  self._requestPath.collectionId = collectionQuery;
+  
 
   self._requestCollection = self._server._collections[self._requestPath.collectionPath] ? self._server._collections[self._requestPath.collectionPath].collection : undefined;
 
@@ -333,6 +343,9 @@ CollectionAPI._requestListener.prototype._sendResponse = function(statusCode, bo
   self._response.statusCode = statusCode;
   self._response.setHeader('Content-Length', Buffer.byteLength(body, 'utf8'));
   self._response.setHeader('Content-Type', 'application/json');
+  self._response.setHeader('Access-Control-Allow-Origin', '*');
+  self._response.setHeader('Access-Control-Allow-Methods','POST, PUT, DELETE, GET, OPTIONS');
+  self._response.setHeader('Access-Control-Allow-Headers','X-Requested-With,X-Auth-Token');
   self._response.write(body);
   self._response.end();
 };
