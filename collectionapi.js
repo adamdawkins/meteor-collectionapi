@@ -100,8 +100,8 @@ CollectionAPI._requestListener = function (server, request, response) {
   self._requestPath = {};
   self._requestPath.collectionPath = requestPath[0];
   
-  console.log 'self.requestUrl.pathname', self.requestUrl.pathname
-  console.log 'requestPath', requestPath
+  console.log('self.requestUrl.pathname', self.requestUrl.pathname);
+  console.log('requestPath', requestPath);
   if(requestPath[1].indexOf(':') > -1) {
     var field, query;
     field = requestPath[1].split(':')[0];
